@@ -11,7 +11,7 @@ BIN = $(BINDIR)/PasswordManager
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
+	$(CC) -lm $(CFLAGS) $(OBJS) -o $@
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@

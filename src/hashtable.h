@@ -5,9 +5,15 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+typedef struct HashElement {
+  FILE *file;
+  char *key;
+} HashElement;
+
 typedef struct HashTable {
-  FILE **files;
+  HashElement **elements;
   int size;
+  int length;
 } HashTable;
 
 HashTable hashtable_init();

@@ -1,13 +1,16 @@
 #include"hashtable.h"
+#include<math.h>
+#include<string.h>
 
-#define Initial_Size 64
+#define INITIAL_SIZE 64
 
-int hash(char* key);
+int hash_func(char* key);
 
 HashTable hashtable_init() {
   HashTable hashtable;
-  hashtable.files = malloc(64);
+  hashtable.elements = calloc(INITIAL_SIZE, sizeof(HashElement));
   hashtable.size = 0;
+  hashtable.length = INITIAL_SIZE;
 
   return hashtable;
 }
@@ -22,16 +25,40 @@ bool hashtable_is_empty(HashTable *hash_table) {
 }
 
 FILE* hashtable_get(HashTable* hash_table, char* key) {
-  FILE *fp;
-  int index = hash(key);
+  FILE *fp = NULL;
+  int counter = 0;
+  int hash;
+  HashElement *h;
 
-  if(index == -1) {
+  if(hash_table == NULL)
     return NULL;
-  }
+  do {
+    hash = (hash_func(key) + pow(counter, 2)) % (hash_table -> length);
+    *h = *((hash_table -> elements) + hash);
+
+    if(h == NULL)
+      return NULL;
+    if(strcmp(key, h -> key) == 0)
+      fp = h -> file;
+    else
+      counter++;
+  } while(strcmp(key, h -> key) != 0);
 
   return fp; // null pointer will be handled on call
 }
 
-int hash(char* key) {
-  return -1;
+void hashTable_add(HashTable *hash_table, char* key) {
+
+}
+
+int hash_func(char* key) { // polynomial rolling hash
+  const int p = 31, m = pow(10, 9) + 9;
+  unsigned long key_hash = 0;
+  int p_pow = 0;
+
+  while(*key != 0) {
+    key_hash += (unsigned long)((*key) * pow((double)p, p_pow)) % m;
+    key = key + 1;
+  }
+  return key_hash;
 }
