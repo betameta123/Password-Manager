@@ -1,5 +1,6 @@
 #include"hashtable.h"
 #include<math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include<string.h>
 
@@ -7,8 +8,19 @@
 
 int hash_func(char* key);
 
-HashElement hashelement_init() {
+HashElement hashElement_init(char* key) {
+  char* dir;
+  HashElement element;
+  char *strpath;
+  FILE* file;
 
+  dir = key;
+  element.key = key;
+  //
+  file = fopen(key, "wr");
+  element.file = file;
+
+  return element;
 }
 
 HashTable hashtable_init() {
@@ -53,9 +65,10 @@ FILE* hashtable_get(HashTable* hash_table, char* key) {
   return fp;
 }
 
-bool hashTable_add(HashTable *hash_table, char* key) {
+bool hashtable_add(HashTable *hash_table, char* key, char* data) {
   int counter = 0, hash = 0;
-  HashElement hash_element;
+  HashElement *hash_element;
+  FILE *file;
   if(hash_table == NULL) // hash_table is empty create new hashtable
     *hash_table = hashtable_init();
   if(key == NULL)
@@ -69,10 +82,22 @@ bool hashTable_add(HashTable *hash_table, char* key) {
 
   do {
     int hash = (int)(hash_func(key) + pow(counter, 2)) % (hash_table->length);
-    if(*(hash_table->elements + hash) == NULL) {
-      hash_element.key = hash;
+    hash_element = *(hash_table->elements + hash);
+    if(hash_element == NULL) { // if empty node is found
+      *hash_element = hashElement_init(key);
     }
-  } while(*(hash_table->elements + hash) != NULL);
+
+  //   // Limit number of iterations to avoid inifinite loops 
+  //   if(counter > hash_table->length * 2) 
+  //     return false;
+  //
+  //   counter++;
+  } while(hash_element != NULL);
+  //
+  // fprintf(hash_element->file, "%s", data);
+  // fclose(hash_element->file);
+
+  return true;
 }
 
 int hash_func(char* key) { // polynomial rolling hash
