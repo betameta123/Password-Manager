@@ -1,10 +1,15 @@
 #include"hashtable.h"
 #include<math.h>
+#include <stdlib.h>
 #include<string.h>
 
 #define INITIAL_SIZE 64
 
 int hash_func(char* key);
+
+HashElement hashelement_init() {
+
+}
 
 HashTable hashtable_init() {
   HashTable hashtable;
@@ -16,12 +21,12 @@ HashTable hashtable_init() {
 }
 
 int hashtable_size(HashTable *hash_table) {
-  return hash_table -> size;
+  return hash_table->size;
 }
 
 bool hashtable_is_empty(HashTable *hash_table) {
   // non-existant hashtable is empty or if size is 0
-  return hash_table == NULL || hash_table -> size == 0;
+  return hash_table == NULL || hash_table->size == 0;
 }
 
 FILE* hashtable_get(HashTable* hash_table, char* key) {
@@ -34,21 +39,40 @@ FILE* hashtable_get(HashTable* hash_table, char* key) {
     return NULL; // null pointer will be handled on call
   do {
     // calculate hash
-    hash = (int)(hash_func(key) + pow(counter, 2)) % (hash_table -> length);
-    h = *((hash_table -> elements) + hash);
+    hash = (int)(hash_func(key) + pow(counter, 2)) % (hash_table->length);
+    h = *((hash_table->elements) + hash);
 
     if(h == NULL) // if element does not exist
       return NULL;
-    if(strcmp(key, h -> key) == 0) // key found
-      fp = h -> file;
+    if(strcmp(key, h->key) == 0) // key found
+      fp = h->file;
     else
       counter++; // next hash
-  } while(strcmp(key, h -> key) != 0);
+  } while(strcmp(key, h->key) != 0);
 
   return fp;
 }
 
-void hashTable_add(HashTable *hash_table, char* key) {
+bool hashTable_add(HashTable *hash_table, char* key) {
+  int counter = 0, hash = 0;
+  HashElement hash_element;
+  if(hash_table == NULL) // hash_table is empty create new hashtable
+    *hash_table = hashtable_init();
+  if(key == NULL)
+    return false;
+
+  // Change to shadow array implementation?
+  if(hash_table->size == (int)((hash_table->length)/0.6f)) { // if hash_table is %60 full
+    hash_table = realloc(hash_table, hash_table->length*2);
+    hash_table->length = hash_table->length*2;
+  }
+
+  do {
+    int hash = (int)(hash_func(key) + pow(counter, 2)) % (hash_table->length);
+    if(*(hash_table->elements + hash) == NULL) {
+      hash_element.key = hash;
+    }
+  } while(*(hash_table->elements + hash) != NULL);
 }
 
 int hash_func(char* key) { // polynomial rolling hash
