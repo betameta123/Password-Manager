@@ -31,24 +31,24 @@ FILE* hashtable_get(HashTable* hash_table, char* key) {
   HashElement *h;
 
   if(hash_table == NULL)
-    return NULL;
+    return NULL; // null pointer will be handled on call
   do {
-    hash = (hash_func(key) + pow(counter, 2)) % (hash_table -> length);
-    *h = *((hash_table -> elements) + hash);
+    // calculate hash
+    hash = (int)(hash_func(key) + pow(counter, 2)) % (hash_table -> length);
+    h = *((hash_table -> elements) + hash);
 
-    if(h == NULL)
+    if(h == NULL) // if element does not exist
       return NULL;
-    if(strcmp(key, h -> key) == 0)
+    if(strcmp(key, h -> key) == 0) // key found
       fp = h -> file;
     else
-      counter++;
+      counter++; // next hash
   } while(strcmp(key, h -> key) != 0);
 
-  return fp; // null pointer will be handled on call
+  return fp;
 }
 
 void hashTable_add(HashTable *hash_table, char* key) {
-
 }
 
 int hash_func(char* key) { // polynomial rolling hash
