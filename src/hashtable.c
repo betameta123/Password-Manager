@@ -4,34 +4,26 @@
 #include <stdlib.h>
 #include<string.h>
 
-#define INITIAL_SIZE 4
+#define INITIAL_SIZE 1024
 
-int hash_func(char* path, int length, HashTable *hash_table);
+int hash_func(char* path, int length);
 
-HashElement hashElement_init(char* path, char* data) {
-  HashElement element;
-  element.data = data;
-  element.path = path;
-
-  return element;
+void hashElement_init(HashTable h) {
+  for (int i = 0; i < h.length; i++) {
+    *(h.elements + i) = calloc(1, sizeof(Element));
+    (*(h.elements + i))->head = NULL;
+    (*(h.elements + i))->tail = NULL;
+    (*(h.elements + i))->size = 0;
+  }
 }
 
-HashTable hashtable_init(HashTable *h) {
-  if(h == NULL) {
-    h = calloc(1, sizeof(HashTable));
-    h->elements = calloc(INITIAL_SIZE, sizeof(HashElement));
-    h->size = 0;
-    h->length = INITIAL_SIZE;
-  } else {
-    // free(h->shadow_counter);
-  }
-  h->shadow = calloc(1, sizeof(HashTable));
-  h->shadow->elements = calloc(h->length * 2, sizeof(HashElement));
-  h->shadow->size = h->size;
-  h->shadow->length = h->length * 2;
-  h->shadow_counter = calloc(1, sizeof(int));
-
-  return *h;
+HashTable hashtable_init() {
+  HashTable hash_table;
+  hash_table.length = INITIAL_SIZE;
+  hash_table.size = 0;
+  hash_table.elements = calloc(hash_table.length, sizeof(HashElements));
+  hashElement_init(hash_table);
+  return hash_table;
 }
 
 int hashtable_size(HashTable *hash_table) {
@@ -43,72 +35,83 @@ bool hashtable_is_empty(HashTable *hash_table) {
   return hash_table == NULL || hash_table->size == 0;
 }
 
-char* hashtable_get(HashTable* hash_table, char* path) {
+char* hashtable_get(HashTable* hash_table, char* key) {
+  if(hash_table == NULL || key == NULL)
+    return NULL;
+  HashElements **elements = hash_table->elements;
   int length = hash_table->length;
-  HashElement **elements = hash_table->elements;
-
-  int hash = hash_func(path, length, hash_table);
-  printf("%i\n", hash);
-  return (*(elements + hash))->data;
-}
-
-HashTable hashtable_add(HashTable *hash_table, HashElement *e) {
-  char *path = e->path;
-  HashElement **elements = hash_table->elements;
-  int length = hash_table->length;
-  HashElement **shadow_elements = hash_table->shadow->elements;
-  int shadow_length = hash_table->shadow->length;
-
-  if(hash_table == NULL || e == NULL)
-    return *hash_table;
-
-  if(hash_table->size > (int)(hash_table->length * 0.5)) {// switch to shadow
-    HashTable *old_hash_table = hash_table;
-    hash_table = malloc(sizeof(HashTable));
-    *(hash_table) = *(old_hash_table->shadow);
-    hash_table->shadow = malloc(sizeof(HashTable));
-    // printf("%p\n", hash_table->shadow);
-    *(hash_table->shadow) = hashtable_init(hash_table);
-    length = hash_table->length;
-    shadow_elements = hash_table->shadow->elements;
+  int hash = hash_func(key, length);
+  Element *root = (*(elements + hash))->head;
+  while (root != NULL && strcmp(root->key, key) != 0) {
+    root = root->next; 
   }
 
-  printf("%i ", hash_table->size);
-  printf("%i ", length);
-  int hash = hash_func(path, length, hash_table);
-  *(elements + hash) = e; // overwrite if path already exists in hashtable
-  hash = hash_func(path, shadow_length, hash_table->shadow);
-  *(shadow_elements + hash) = e; // add new elements to shadow array
-  *(hash_table->shadow->elements + *hash_table->shadow_counter) = *(hash_table->elements + *hash_table->shadow_counter);
-  hash_table->shadow_counter++;
-  hash_table->size++;
-  hash_table->shadow->size++;
-  return *hash_table;
+  return root == NULL ? NULL : root->value;
+}
 
+bool hashtable_add(HashTable *hash_table, char *key, char *value) {
+  if(key == NULL)
+    return false;
+
+  if(hash_table == NULL) {
+    HashTable *h = calloc(1, sizeof(HashTable));
+    *h = hashtable_init();
+    hash_table = h;
+  }
+
+  HashElements **elements = hash_table->elements;
+  int length = hash_table->length;
+  int hash = hash_func(key, length);
+  HashElements *root = (*(elements + hash));
+  Element *iter = root->tail;
+  //
+  //
+  Element *e = calloc(1, sizeof(Element));
+  e->key = key;
+  e->value = value;
+  e->next = NULL;
+  
+  if(iter == NULL)
+    root->head = e;
+  else
+    iter->next = e;
+
+  root->tail = e;
+  hash_table->size++;
+  return true;
 }
 
 void hashtable_cleanup(HashTable *hash_table) {
-  free(hash_table);
+  // if(hash_table == NULL)
+  //   return;
+  //
+  // for (int i = 0; i < hash_table->length; i++) { // Free all linked lists
+  //   if(*(hash_table->elements + i) == NULL) {
+  //     continue;
+  //   }
+  //
+  //   free((*(hash_table->elements + i))->tail);
+  //   Element *e = (*(hash_table->elements + i))->head;
+  //   Element *head = e;
+  //   while(head != NULL) { // Iterate through all the elements to free every node
+  //     e = e->next;
+  //     free(head);
+  //     head = e;
+  //   }
+  //   free(hash_table->elements + i); // free the HashElements reference
+  // }
+  // free(hash_table->elements);
+  // free(hash_table);
 }
 
-int hash_func(char* path, int length, HashTable *hash_table) { // polynomial rolling hash
-  const int p = 31, m = pow(10, 9) + 9;
+int hash_func(char* key, int length) {
+  int m = pow(10, 9) + 9;
   unsigned long path_hash = 0;
-  int p_pow = 0;
-  int counter = 0;
 
-  while(*path != 0) {
-    path_hash += (unsigned long)((*path) * pow((double)p, p_pow)) % m;
-    path = path + 1;
+  while(*key != 0) {
+    path_hash += (int)(*key) % m;
+    key = key + 1;
   }
-
-  do {
-    path_hash = (long long)(path_hash + pow(counter, 2)) % length;
-    counter++;
-  } while(*(hash_table->elements + path_hash) != NULL &&
-      strcmp((*(hash_table->elements + path_hash))->path, path) == 0 && 
-      counter < 200);
-
-return path_hash;
+  return path_hash % length;
 }
 

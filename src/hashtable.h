@@ -5,25 +5,30 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-typedef struct HashElement {
-  char *path;
-  char *data;
-} HashElement;
+typedef struct Element {
+  char *key;
+  char *value;
+  struct Element *next;
+} Element;
+
+typedef struct HashElements {
+  struct Element *head;
+  struct Element *tail;
+  int size;
+} HashElements;
 
 typedef struct HashTable {
-  HashElement **elements;
-  int size;
+  struct HashElements **elements;
   int length;
-  struct HashTable *shadow;
-  int *shadow_counter;
+  int size;
 } HashTable;
 
-HashTable hashtable_init(HashTable* h);
-HashElement hashElement_init(char *key, char *data);
-int hashtable_size(HashTable *hash_table);
+
+HashTable hashtable_init();
+// HashElement hashElement_init(char *key, char *data);
 bool hashtable_is_empty(HashTable *hash_table);
 char* hashtable_get(HashTable* hash_table, char* key);
-HashTable hashtable_add(HashTable *hash_table, HashElement *e);
+bool hashtable_add(HashTable *hash_table, char* key, char *value);
 bool hashtable_remove(HashTable *hash_table, char* key);
 void hashtable_empty(HashTable *hash_table);
 void hashtable_cleanup(HashTable *hash_table);
