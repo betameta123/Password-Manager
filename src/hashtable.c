@@ -41,6 +41,7 @@ char* hashtable_get(HashTable* hash_table, char* key) {
   HashElements **elements = hash_table->elements;
   int length = hash_table->length;
   int hash = hash_func(key, length);
+
   Element *root = (*(elements + hash))->head;
   while (root != NULL && strcmp(root->key, key) != 0) {
     root = root->next; 
@@ -78,6 +79,37 @@ bool hashtable_add(HashTable *hash_table, char *key, char *value) {
 
   root->tail = e;
   hash_table->size++;
+  return true;
+}
+
+bool hashtable_remove(HashTable *hash_table, char *key) {
+  if(key == NULL || hash_table == NULL)
+    return false;
+
+  HashElements **elements = hash_table->elements;
+  int length = hash_table->length;
+  int hash = hash_func(key, length);
+  
+  Element *root = (*(elements + hash))->head;
+  Element *prev = NULL;
+
+  if(root == NULL)
+    return false;
+
+  while(root != NULL && root->key != key) {
+    prev = root;
+    root = root->next;
+  }
+
+  if(root == NULL)
+    return false;
+
+  if(prev == NULL) { // if key is head
+    (*(elements + hash))->head = root->next;
+    return true;
+  }
+
+  prev->next = root->next;
   return true;
 }
 
