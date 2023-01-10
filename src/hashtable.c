@@ -82,26 +82,24 @@ bool hashtable_add(HashTable *hash_table, char *key, char *value) {
 }
 
 void hashtable_cleanup(HashTable *hash_table) {
-  // if(hash_table == NULL)
-  //   return;
-  //
-  // for (int i = 0; i < hash_table->length; i++) { // Free all linked lists
-  //   if(*(hash_table->elements + i) == NULL) {
-  //     continue;
-  //   }
-  //
-  //   free((*(hash_table->elements + i))->tail);
-  //   Element *e = (*(hash_table->elements + i))->head;
-  //   Element *head = e;
-  //   while(head != NULL) { // Iterate through all the elements to free every node
-  //     e = e->next;
-  //     free(head);
-  //     head = e;
-  //   }
-  //   free(hash_table->elements + i); // free the HashElements reference
-  // }
-  // free(hash_table->elements);
-  // free(hash_table);
+  if(hash_table == NULL)
+    return;
+
+  for (int i = 0; i < hash_table->length; i++) { // Free all linked lists
+    if(*(hash_table->elements + i) == NULL) {
+      continue;
+    }
+
+    Element *e = (*(hash_table->elements + i))->head;
+    Element *head = e;
+    while(head != NULL) { // Iterate through all the elements to free every node
+      e = e->next;
+      free(head);
+      head = e;
+    }
+    *(hash_table->elements + i) = NULL; // free the HashElements reference
+  }
+  hash_table = NULL;
 }
 
 int hash_func(char* key, int length) {
