@@ -46,7 +46,6 @@ char* hashtable_get(HashTable* hash_table, char* key) {
   while (root != NULL && strcmp(root->key, key) != 0) {
     root = root->next; 
   }
-
   return root == NULL ? NULL : root->value;
 }
 
