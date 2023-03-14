@@ -12,7 +12,7 @@ char **file_get(char* path){ // returns entire content of the file
   fp = fopen(path, "r");
   if(fp == NULL) {
     printf("Error opening file.\n");
-    return NULL; // handle in frontend
+    file_create(path);
   }
 
   int i = 0;
@@ -28,7 +28,17 @@ char **file_get(char* path){ // returns entire content of the file
 }
 
 void file_append(char* path, char* data){ // Appends data to file
-                                          
+  FILE *fp;
+  fp = fopen(path, "a");
+
+  if(fp == NULL) {
+    printf("Error opening file.\n");
+    return;
+  }
+
+  fprintf(fp, "%s", data);
+
+  fclose(fp);
 }
 
 void file_remove(char *path, char* data){ // removes a line from the file
