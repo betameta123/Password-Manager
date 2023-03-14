@@ -31,6 +31,15 @@ int main() {
   for (int i = 0; i < (int)sizeof(*data) / (int)sizeof(**data); i++) {
     printf("%s", data[i]);
   }
+
+  printf("------------------------------------\n\n");
+
+  file_remove(key, "foo bar\n");
+  data = file_get(key);
+
+  for (int i = 0; i < (int)sizeof(*data) / (int)sizeof(**data); i++) {
+    printf("%s", data[i]);
+  }
   // printf("Length is %d", (int)sizeof(*data) / (int)sizeof(**data));
   // for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
   //   printf("%s",data[i]);
