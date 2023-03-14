@@ -6,8 +6,9 @@
 #define MAX_LEN 5000
 
 char **file_get(char* path){ // returns entire content of the file
-  char **data = malloc(sizeof(char*));
+  char **data = malloc(MAX_LEN * sizeof(char *));
   FILE *fp;
+
   fp = fopen(path, "r");
   if(fp == NULL) {
     printf("Error opening file.\n");
@@ -15,12 +16,14 @@ char **file_get(char* path){ // returns entire content of the file
   }
 
   int i = 0;
-  while(!feof(fp) && !ferror(fp)) {
+  while(!feof(fp) && !ferror(fp) && i < MAX_LEN) { // End of file or max length
     data[i] = malloc(MAX_LINE_LEN);
 
     if(fgets(data[i], MAX_LINE_LEN, fp) != NULL)
       i++;
   }
+
+  fclose(fp);
   return data;
 }
 

@@ -8,13 +8,20 @@ bool login();
 bool authenticate(char *username, char *password);
 bool decrypt_add(char *username, char *password);
 
+#define MAX_LINE_LEN 1000
+#define MAX_LEN 5000
+
 int main() {
   // while(!login()) { // keep showing login prompt until valid login given
   //   continue;
   // }
   char *key = "database/test.txt";
   char **data = file_get(key);
-  printf("Length is %d", (int)sizeof(*data) / (int)sizeof(**data));
+
+  for (int i = 0; i < (int)sizeof(*data) / (int)sizeof(**data); i++) {
+    printf("%s", data[i]);
+  }
+  // printf("Length is %d", (int)sizeof(*data) / (int)sizeof(**data));
   // for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
   //   printf("%s",data[i]);
   // }
@@ -32,6 +39,8 @@ int main() {
   // hashtable_cleanup(&h);
   return 1;
 }
+
+
 
 // bool login() {
 //   const int MAX_USER_LENGTH = 64;
