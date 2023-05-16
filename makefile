@@ -9,6 +9,7 @@ BINDIR=bin
 BIN = $(BINDIR)/PasswordManager
 
 all: $(BIN)
+	./bin/PasswordManager
 
 $(BIN): $(OBJS)
 	$(CC) -lm $(CFLAGS) $(OBJS) -o $@

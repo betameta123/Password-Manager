@@ -81,7 +81,11 @@ bool login() {
 }
 
 bool authenticate(char *username, char *password) {
-  return true;
+  char *key = "database/user.txt";
+  char **users = file_get(key);
+  // TODO: Decide Reasonable format for the file
+  // TODO: Implement binary search for the user
+  return false;
 }
 
 void menu() {

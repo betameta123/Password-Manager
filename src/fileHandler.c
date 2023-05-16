@@ -66,7 +66,6 @@ void file_remove(char *path, char* data) { // removes a line from the file
   fclose(fp);
   fclose(fp_temp);
   rename(tmp_file, path);
-
 }
 
 void file_delete(char *path) { // deletes the entire file
